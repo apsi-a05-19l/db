@@ -40,7 +40,7 @@ ENGINE = InnoDB;
 -- Table `apsi`.`Person`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `apsi`.`Person` (
-  `idPerson` INT NOT NULL AUTO_INCREMENT,
+  `idPerson` BIGINT(20) NOT NULL AUTO_INCREMENT,
   `first_name` VARCHAR(45) NULL,
   `last_name` VARCHAR(45) NULL,
   `phone_number` VARCHAR(45) NULL,
@@ -66,7 +66,7 @@ ENGINE = InnoDB;
 CREATE TABLE IF NOT EXISTS `apsi`.`User` (
   `login` VARCHAR(45) NOT NULL,
   `password` VARCHAR(45) NOT NULL,
-  `Person_idPerson` INT NOT NULL,
+  `Person_idPerson` BIGINT(20) NOT NULL,
   UNIQUE INDEX `login_UNIQUE` (`login` ASC),
   INDEX `idx_login` USING BTREE (`login`) KEY_BLOCK_SIZE = 50,
   INDEX `idx_login_password` USING BTREE (`login`, `password`),
@@ -92,13 +92,13 @@ ENGINE = InnoDB;
 -- Table `apsi`.`Project`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `apsi`.`Project` (
-  `idProject` INT NOT NULL AUTO_INCREMENT,
+  `idProject` BIGINT(20) NOT NULL AUTO_INCREMENT,
   `date_from` DATE NULL,
   `name` VARCHAR(45) NULL,
-  `project_leader` INT NOT NULL,
+  `project_leader` BIGINT(20) NOT NULL,
   PRIMARY KEY (`idProject`),
-  INDEX `fk_Project_Person1_idx` (`project_leader` ASC),
   INDEX `idx_name` (`name` ASC),
+  INDEX `fk_Project_Person1_idx` (`project_leader` ASC),
   CONSTRAINT `fk_Project_Person1`
     FOREIGN KEY (`project_leader`)
     REFERENCES `apsi`.`Person` (`idPerson`)
@@ -114,8 +114,8 @@ CREATE TABLE IF NOT EXISTS `apsi`.`Report` (
   `idReport` INT NOT NULL AUTO_INCREMENT,
   `content` VARCHAR(1000) NULL,
   `date` DATE NULL,
-  `Project_idProject` INT NOT NULL,
-  PRIMARY KEY (`idReport`, `Project_idProject`),
+  `Project_idProject` BIGINT(20) NOT NULL,
+  PRIMARY KEY (`idReport`),
   INDEX `fk_Report_Project1_idx` (`Project_idProject` ASC),
   CONSTRAINT `fk_Report_Project1`
     FOREIGN KEY (`Project_idProject`)
@@ -129,21 +129,21 @@ ENGINE = InnoDB;
 -- Table `apsi`.`Persons_Projects`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `apsi`.`Persons_Projects` (
-  `id` INT NOT NULL AUTO_INCREMENT,
-  `Person_idPerson` INT NOT NULL,
-  `Project_idProject` INT NOT NULL,
+  `id` BIGINT(20) NOT NULL AUTO_INCREMENT,
   `date_from` DATE NULL,
-  INDEX `fk_PersonsProjects_Project1_idx` (`Project_idProject` ASC),
+  `Person_idPerson` BIGINT(20) NOT NULL,
+  `Project_idProject` BIGINT(20) NOT NULL,
   PRIMARY KEY (`id`),
   INDEX `fk_Persons_Projects_Person1_idx` (`Person_idPerson` ASC),
-  CONSTRAINT `fk_PersonsProjects_Project1`
-    FOREIGN KEY (`Project_idProject`)
-    REFERENCES `apsi`.`Project` (`idProject`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
+  INDEX `fk_Persons_Projects_Project1_idx` (`Project_idProject` ASC),
   CONSTRAINT `fk_Persons_Projects_Person1`
     FOREIGN KEY (`Person_idPerson`)
     REFERENCES `apsi`.`Person` (`idPerson`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_Persons_Projects_Project1`
+    FOREIGN KEY (`Project_idProject`)
+    REFERENCES `apsi`.`Project` (`idProject`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
@@ -162,22 +162,22 @@ ENGINE = InnoDB;
 -- Table `apsi`.`Post`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `apsi`.`Post` (
-  `id` INT NOT NULL AUTO_INCREMENT,
+  `id` BIGINT(20) NOT NULL AUTO_INCREMENT,
   `title` VARCHAR(45) NULL,
-  `author` INT NOT NULL,
   `Topic_name` VARCHAR(45) NOT NULL,
+  `author` BIGINT(20) NOT NULL,
   PRIMARY KEY (`id`),
   INDEX `idx_title` (`title` ASC),
-  INDEX `fk_author_idx` (`author` ASC),
   INDEX `fk_Post_Topic1_idx` (`Topic_name` ASC),
-  CONSTRAINT `fk_Post_Person1`
-    FOREIGN KEY (`author`)
-    REFERENCES `apsi`.`Person` (`idPerson`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
+  INDEX `fk_Post_Person1_idx` (`author` ASC),
   CONSTRAINT `fk_Post_Topic1`
     FOREIGN KEY (`Topic_name`)
     REFERENCES `apsi`.`Topic` (`name`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_Post_Person1`
+    FOREIGN KEY (`author`)
+    REFERENCES `apsi`.`Person` (`idPerson`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
@@ -196,13 +196,13 @@ ENGINE = InnoDB;
 -- Table `apsi`.`Part`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `apsi`.`Part` (
-  `id` INT NOT NULL AUTO_INCREMENT,
+  `id` BIGINT(20) NOT NULL AUTO_INCREMENT,
   `header` VARCHAR(45) NULL,
   `contents` VARCHAR(2000) NULL,
-  `Post_id` INT NOT NULL,
-  PRIMARY KEY (`id`, `Post_id`),
-  INDEX `fk_Content_Post1_idx` (`Post_id` ASC),
-  CONSTRAINT `fk_Content_Post1`
+  `Post_id` BIGINT(20) NOT NULL,
+  PRIMARY KEY (`id`),
+  INDEX `fk_Part_Post1_idx` (`Post_id` ASC),
+  CONSTRAINT `fk_Part_Post1`
     FOREIGN KEY (`Post_id`)
     REFERENCES `apsi`.`Post` (`id`)
     ON DELETE NO ACTION
@@ -214,13 +214,13 @@ ENGINE = InnoDB;
 -- Table `apsi`.`Link`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `apsi`.`Link` (
-  `id` INT NOT NULL AUTO_INCREMENT,
+  `id` BIGINT(20) NOT NULL AUTO_INCREMENT,
   `order_number` INT NULL,
   `source` VARCHAR(200) NULL,
-  `Part_id` INT NOT NULL,
+  `Part_id` BIGINT(20) NOT NULL,
   PRIMARY KEY (`id`),
-  INDEX `fk_Link_Content1_idx` (`Part_id` ASC),
-  CONSTRAINT `fk_Link_Content1`
+  INDEX `fk_Link_Part1_idx` (`Part_id` ASC),
+  CONSTRAINT `fk_Link_Part1`
     FOREIGN KEY (`Part_id`)
     REFERENCES `apsi`.`Part` (`id`)
     ON DELETE NO ACTION
@@ -232,20 +232,20 @@ ENGINE = InnoDB;
 -- Table `apsi`.`PostTags_Posts`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `apsi`.`PostTags_Posts` (
-  `id` INT NOT NULL AUTO_INCREMENT,
-  `Post_id` INT NOT NULL,
+  `id` BIGINT(20) NOT NULL AUTO_INCREMENT,
   `PostTag_name` VARCHAR(45) NOT NULL,
-  INDEX `fk_PostTagsPosts_Post1_idx` (`Post_id` ASC),
+  `Post_id` BIGINT(20) NOT NULL,
   INDEX `fk_PostTagsPosts_PostTag1_idx` (`PostTag_name` ASC),
   PRIMARY KEY (`id`),
-  CONSTRAINT `fk_PostTagsPosts_Post1`
-    FOREIGN KEY (`Post_id`)
-    REFERENCES `apsi`.`Post` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
+  INDEX `fk_PostTags_Posts_Post1_idx` (`Post_id` ASC),
   CONSTRAINT `fk_PostTagsPosts_PostTag1`
     FOREIGN KEY (`PostTag_name`)
     REFERENCES `apsi`.`PostTag` (`name`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_PostTags_Posts_Post1`
+    FOREIGN KEY (`Post_id`)
+    REFERENCES `apsi`.`Post` (`id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
@@ -255,11 +255,11 @@ ENGINE = InnoDB;
 -- Table `apsi`.`Activity`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `apsi`.`Activity` (
-  `idActivity` INT NOT NULL AUTO_INCREMENT,
+  `idActivity` BIGINT(20) NOT NULL AUTO_INCREMENT,
   `date` DATE NULL,
   `points` INT NULL,
   `ActivityTag_name` VARCHAR(45) NOT NULL,
-  `Person_idPerson` INT NOT NULL,
+  `Person_idPerson` BIGINT(20) NOT NULL,
   PRIMARY KEY (`idActivity`),
   INDEX `fk_Activity_ActivityTag1_idx` (`ActivityTag_name` ASC),
   INDEX `idx_date` (`date` ASC),
@@ -281,9 +281,9 @@ ENGINE = InnoDB;
 -- Table `apsi`.`Persons_Permissions`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `apsi`.`Persons_Permissions` (
-  `id` INT NOT NULL AUTO_INCREMENT,
+  `id` BIGINT(20) NOT NULL AUTO_INCREMENT,
   `PermissionInSystem_Permission` VARCHAR(45) NOT NULL,
-  `User_Person_idPerson` INT NOT NULL,
+  `User_Person_idPerson` BIGINT(20) NOT NULL,
   INDEX `fk_Persons_Permissions_PermissionInSystem1_idx` (`PermissionInSystem_Permission` ASC),
   PRIMARY KEY (`id`),
   INDEX `fk_Persons_Permissions_User1_idx` (`User_Person_idPerson` ASC),
